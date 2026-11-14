@@ -1,4 +1,4 @@
-# opencode-deepseek-peak
+# @suheugene/deepseek-peak-indicator
 
 An [OpenCode](https://opencode.ai) TUI plugin that shows a DeepSeek off-peak
 badge in the sidebar:
@@ -35,6 +35,5 @@ notice — update the table when it lands.
 
 ```bash
 bun install
-bun test        # peak-window logic
 bunx tsc --noEmit
 ```
