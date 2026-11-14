@@ -28,7 +28,8 @@ notice — update the table when it lands.
 ```jsonc
 // ~/.config/opencode/opencode.json(c)
 {
-  "plugin": ["/path/to/this/directory"]
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": ["@suheugene/deepseek-peak-indicator"]
 }
 ```
 
