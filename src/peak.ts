@@ -90,7 +90,7 @@ export function peakStatus(now: Date): PeakStatus {
   return { peak: false, ms: 0 }
 }
 
-/** "HH:MM" — hours may exceed 24 (e.g. Friday evening to Monday 01:00 UTC). */
+/** "HHh MMm" (or "Xd Hh" over a day, "Mm" under an hour). */
 export function fmt(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 60_000)) + 1
   const d = Math.floor(total / 60 / 24)

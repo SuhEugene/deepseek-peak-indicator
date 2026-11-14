@@ -4,12 +4,13 @@ An [OpenCode](https://opencode.ai) TUI plugin that shows a DeepSeek off-peak
 badge in the sidebar:
 
 ```
-Deepseek Peak: in 02:41    ← off-peak, next peak window in 2h41m (green)
-Deepseek Peak: 00:22 left  ← peak window ends in 22 min (red)
+Deepseek Peak: in 02h 41m   ← off-peak, next peak window in 2h 41m (green)
+Deepseek Peak: 22m left     ← peak window ends in 22 min (red)
 ```
 
-`Deepseek Peak:` is blue; `in HH:MM` is green; `HH:MM left` is red. Hours can
-exceed 24 (e.g. Friday evening shows the gap to Monday 01:00 UTC).
+`Deepseek Peak:` is blue; `in HHh MMm` is green; `MMm left` is red. Gaps
+longer than a day show as `Xd Hh` (e.g. Friday evening shows the gap to
+Monday 01:00 UTC).
 
 ## When is peak?
 
