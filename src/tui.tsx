@@ -1,3 +1,6 @@
+/** @jsxImportSource @opentui/solid */
+// Pragma, not tsconfig: the published package ships only src/, so without it
+// Bun's default JSX transform imports react and the plugin fails to load.
 import { Plugin } from "@opencode/plugin/tui"
 import type { Context } from "@opencode/plugin/tui/plugin"
 import { onCleanup, createSignal } from "solid-js"
