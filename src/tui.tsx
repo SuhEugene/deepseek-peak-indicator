@@ -15,9 +15,7 @@ function Badge(props: { theme: ResolvedTheme }) {
   const status = () => peakStatus(now())
   return (
     <box flexDirection="row">
-      {/* theme.hue.blue exists at runtime, just missing from @opencode/theme's SemanticHue type */}
-      {/* @ts-expect-error blue is a real theme hue */}
-      <text fg={props.theme.hue.blue[100]}>Deepseek Peak: </text>
+      <text fg="#4D6BFE">Deepseek Peak: </text>
       <text fg={status().peak ? props.theme.text.feedback.error.base : props.theme.text.base}>
         {status().peak ? `${fmt(status().ms)} left` : `in ${fmt(status().ms)}`}
       </text>
