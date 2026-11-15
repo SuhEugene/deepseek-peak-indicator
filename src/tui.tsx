@@ -15,7 +15,7 @@ function Badge() {
   const status = () => peakStatus(now())
   return (
     <box flexDirection="row">
-      <text fg="#4D6BFE">Deepseek Peak: </text>
+      <text fg="#6c80e8">Deepseek Peak: </text>
       <text fg={status().peak ? theme.text.feedback.error.base : theme.text.base}>
         {status().peak ? `${fmt(status().ms)} left` : `in ${fmt(status().ms)}`}
       </text>
