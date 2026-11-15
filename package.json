@@ -1,6 +1,6 @@
 {
   "name": "@suheugene/deepseek-peak-indicator",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "OpenCode TUI plugin that shows a DeepSeek off-peak badge in the sidebar",
   "type": "module",
   "license": "MIT",
@@ -17,9 +17,8 @@
     "@opencode/plugin": "latest"
   },
   "peerDependencies": {
-    "@opencode/theme": "^2.3.0",
-    "@opentui/core": "^0.8.4",
-    "@opentui/solid": "^0.8.4",
+    "@opentui/core": ">=0.6.6",
+    "@opentui/solid": ">=0.6.6",
     "solid-js": ">=1.9.0"
   },
   "publishConfig": {
