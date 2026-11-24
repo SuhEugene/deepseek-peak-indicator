@@ -1,13 +1,16 @@
 /**
- * DeepSeek off-peak logic.
+ * Off-peak logic.
  *
- * Official (api-docs.deepseek.com): peak hours are 01:00–04:00 and 06:00–10:00
- * UTC, Monday through Friday, excluding Chinese public holidays. All other
- * hours are off-peak, including weekends and holidays in full.
+ * DeepSeek, official (api-docs.deepseek.com): peak hours are 01:00–04:00 and
+ * 06:00–10:00 UTC, Monday through Friday, excluding Chinese public holidays.
+ * All other hours are off-peak, including weekends and holidays in full.
  *
- * China is UTC+8 with no DST, and both peak windows (+8 = 09:00–12:00 and
- * 14:00–18:00) fall on the same China calendar date as their UTC date — so the
- * UTC date can be matched directly against the China holiday list.
+ * Z.ai: peak hours are 14:00–18:00 Singapore time (UTC+8, no DST), Monday
+ * through Friday — 06:00–10:00 UTC. Documentation lists no holiday exceptions.
+ *
+ * China is UTC+8 with no DST, and both DeepSeek peak windows (+8 = 09:00–12:00
+ * and 14:00–18:00) fall on the same China calendar date as their UTC date — so
+ * the UTC date can be matched directly against the China holiday list.
  */
 
 // Rest-day ranges (mmdd, inclusive) per year.
@@ -36,11 +39,27 @@ export const HOLIDAYS: Record<number, Array<[number, number]>> = {
   ],
 }
 
+export const PROVIDERS = {
+  deepseek: {
+    label: "Deepseek",
+    description: "Mon–Fri 01:00–04:00 and 06:00–10:00 UTC, China holidays off",
+  },
+  zai: {
+    label: "Z.ai",
+    description: "Mon–Fri 14:00–18:00 UTC+8",
+  },
+} as const
+
+export type Provider = keyof typeof PROVIDERS
+
 // UTC hours [start, end)
-const PEAK_WINDOWS: Array<[number, number]> = [
-  [1, 4],
-  [6, 10],
-]
+const PEAK_WINDOWS: Record<Provider, Array<[number, number]>> = {
+  deepseek: [
+    [1, 4],
+    [6, 10],
+  ],
+  zai: [[6, 10]],
+}
 
 const md = (d: Date) => (d.getUTCMonth() + 1) * 100 + d.getUTCDate()
 
@@ -50,10 +69,11 @@ export function isChinaHoliday(d: Date): boolean {
   return (HOLIDAYS[year] ?? []).some(([a, b]) => day >= a && day <= b)
 }
 
-function peakWindows(d: Date): Array<[number, number]> {
+function peakWindows(d: Date, provider: Provider): Array<[number, number]> {
   const wd = d.getUTCDay()
-  if (wd === 0 || wd === 6 || isChinaHoliday(d)) return []
-  return PEAK_WINDOWS
+  if (wd === 0 || wd === 6) return []
+  if (provider === "deepseek" && isChinaHoliday(d)) return []
+  return PEAK_WINDOWS[provider]
 }
 
 /** Milliseconds since that date's 00:00 UTC. */
@@ -67,11 +87,11 @@ export type PeakStatus = { peak: boolean; ms: number }
  * Current state and time until it flips: `ms` counts down to the end of the
  * current peak window, or up to the start of the next one.
  */
-export function peakStatus(now: Date): PeakStatus {
+export function peakStatus(now: Date, provider: Provider = "deepseek"): PeakStatus {
   let day = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
   const t = dayMs(now)
 
-  for (const [start, end] of peakWindows(day)) {
+  for (const [start, end] of peakWindows(day, provider)) {
     if (t >= start * 3_600_000 && t < end * 3_600_000) {
       return { peak: true, ms: end * 3_600_000 - t }
     }
@@ -80,7 +100,7 @@ export function peakStatus(now: Date): PeakStatus {
   // Off-peak: find the next window start, at most ~3 weeks out (longest gap:
   // a long Spring Festival break, ~12 days).
   for (let i = 0; i < 21; i++) {
-    const windows = peakWindows(day)
+    const windows = peakWindows(day, provider)
     for (const [start] of windows) {
       const s = start * 3_600_000
       if (i > 0 || s > t) return { peak: false, ms: s - t + i * 86_400_000 }

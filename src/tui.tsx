@@ -4,20 +4,53 @@
 import { Plugin, usePlugin } from "@opencode/plugin/tui"
 import type { Context } from "@opencode/plugin/tui/plugin"
 import { onCleanup, createSignal } from "solid-js"
-import { fmt, peakStatus } from "./peak"
+import { PROVIDERS, PeakStatus, fmt, peakStatus, type Provider } from "./peak"
+import { TextAttributes } from "@opentui/core"
 
 function Badge() {
-  const theme = usePlugin().theme
+  const plugin = usePlugin()
+  const theme = plugin.theme
+  const [provider, setProvider] = plugin.storage.store<{ id: Provider }>("provider", {
+    initial: { id: "deepseek" },
+  })
   const [now, setNow] = createSignal(new Date())
   const tick = setInterval(() => setNow(new Date()), 1000)
   onCleanup(() => clearInterval(tick))
 
-  const status = () => peakStatus(now())
+  const info = () => PROVIDERS[provider.id]
+  const status = () => peakStatus(now(), provider.id)
+
+  const getStatusString = (ps: PeakStatus) => ps.peak ? `${fmt(ps.ms)} left` : `in ${fmt(ps.ms)}`
+
+  const choose = async () => {
+    const next = await plugin.ui.dialog.select<Provider>({
+      title: "Peak hours provider",
+      current: provider.id,
+      options: (Object.keys(PROVIDERS) as Provider[]).map((id) => {
+        const ps = peakStatus(now(), id);
+        return ({
+        title: PROVIDERS[id].label,
+        description: PROVIDERS[id].description,
+        footer: getStatusString(ps),
+        category: ps.peak ? 'Peak in progress' : 'No peak',
+        value: id,
+      })
+      }),
+    })
+    if (next) await setProvider((draft) => { draft.id = next })
+  }
+
   return (
     <box flexDirection="row">
-      <text fg="#6c80e8">Deepseek Peak: </text>
+      <text
+        fg={provider.id === "zai" ? "#aaaaaa" : "#6c80e8"}
+        onMouseUp={() => void choose()}
+        attributes={TextAttributes.BOLD}
+      >
+        {`${info().label} Peak: `}
+      </text>
       <text fg={status().peak ? theme.text.feedback.error.base : theme.text.base}>
-        {status().peak ? `${fmt(status().ms)} left` : `in ${fmt(status().ms)}`}
+        {getStatusString(status())}
       </text>
     </box>
   )
